@@ -5,12 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Paperleaf Books – Independent Bookshop</title>
 <meta name="description" content="Hand-picked books for curious readers. Fiction, mystery, sci-fi, self-growth and more.">
+<meta name="robots" content="index,follow" id="robots">
+<link rel="canonical" href="" id="canon">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Paperleaf Books">
+<meta property="og:title" content="" id="ogt"><meta property="og:description" content="" id="ogd"><meta property="og:url" content="" id="ogu">
+<meta name="twitter:card" content="summary"><meta name="theme-color" content="#0d2b31">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BookStore","name":"Paperleaf Books","description":"Independent online bookshop in India","address":{"@type":"PostalAddress","streetAddress":"12 Library Street","addressLocality":"Chennai","addressRegion":"Tamil Nadu","addressCountry":"IN"},"openingHours":"Mo-Su 10:00-21:00","priceRange":"₹₹"}</script>
+<script>
+/* ===== TRACKING SETUP: paste your IDs here (leave "" to disable) ===== */
+window.dataLayer=window.dataLayer||[];
+window.SITE={GTM_ID:"",GA4_ID:"",META_PIXEL_ID:""};
+(function(){var S=window.SITE,d=document;function js(u){var s=d.createElement("script");s.async=1;s.src=u;d.head.appendChild(s)}
+if(S.GTM_ID){dataLayer.push({"gtm.start":Date.now(),event:"gtm.js"});js("https://www.googletagmanager.com/gtm.js?id="+S.GTM_ID)}
+if(S.GA4_ID){window.gtag=function(){dataLayer.push(arguments)};gtag("js",new Date());gtag("config",S.GA4_ID,{send_page_view:false});js("https://www.googletagmanager.com/gtag/js?id="+S.GA4_ID)}
+if(S.META_PIXEL_ID){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,d,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init",S.META_PIXEL_ID)}
+})();
+</script>
+<!-- PASTE ANY OTHER LAUNCH / TRACKING SCRIPT HERE (it can read window.dataLayer events) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-<!--<script src="https://assets.adobedtm.com/4fa03d1212c6/a47ab7cbde01/launch-5e36b9a1c465-development.min.js" async></script>-->
-<script src="https://assets.adobedtm.com/4fa03d1212c6/fa52ba246d7e/launch-fecd7ddb7b33-development.min.js" async></script>
-  
-  <style>
+<style>
 :root{--ink:#0d2b31;--ink2:#154047;--mist:#f3f6f5;--card:#fff;--gold:#f4b41a;--plum:#5b2a6e;--text:#1b2b2e;--muted:#5d6f72;--line:#dbe4e2;--r:14px}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -334,6 +348,12 @@ const BOOKS=[
 ];
 const FEAT={id:5,d:"Six colonists. One dying star. A ship that remembers everything they tried to forget. Kavya Shah's award-winning novel is a gripping story of loyalty, memory and survival."};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+/* Event tracking: pushes to dataLayer, GA4 (gtag) and Meta Pixel (fbq) when present */
+const FB={page_view:"PageView",add_to_cart:"AddToCart",begin_checkout:"InitiateCheckout",purchase:"Purchase",generate_lead:"Lead",search:"Search",sign_up:"CompleteRegistration"};
+const gi=(b,q=1)=>({item_id:String(b.id),item_name:b.t,item_category:b.cat,item_brand:b.a,price:b.p,quantity:q});
+function track(ev,p){p=Object.assign({currency:"INR"},p||{});
+  try{window.gtag?gtag("event",ev,p):window.dataLayer.push(Object.assign({event:ev},p))}catch(e){}
+  try{if(window.fbq){const f=FB[ev],it=p.items||[];f?fbq("track",f,{value:p.value,currency:p.currency,content_ids:it.map(i=>i.item_id),content_type:"product",num_items:it.length,search_string:p.search_term}):fbq("trackCustom",ev,p)}}catch(e){}}
 const money=n=>"₹"+n.toLocaleString("en-IN");
 const byId=id=>BOOKS.find(b=>b.id===id);
 
@@ -365,8 +385,8 @@ stage.addEventListener("mouseleave",()=>stack.style.transform="");
 /* Shop */
 const cats=["All",...new Set(BOOKS.map(b=>b.cat))];let cat="All";
 $("#chips").innerHTML=cats.map(c=>`<button class="chip${c==="All"?" on":""}" data-c="${c}">${c}</button>`).join("");
-$("#chips").onclick=e=>{const c=e.target.dataset.c;if(!c)return;cat=c;$$(".chip").forEach(x=>x.classList.toggle("on",x.dataset.c===c));render()};
-$("#q").oninput=render;$("#sort").onchange=render;
+$("#chips").onclick=e=>{const c=e.target.dataset.c;if(!c)return;cat=c;track("select_category",{category:c});$$(".chip").forEach(x=>x.classList.toggle("on",x.dataset.c===c));render()};
+let sq;$("#q").oninput=()=>{render();clearTimeout(sq);sq=setTimeout(()=>{const v=$("#q").value.trim();v&&track("search",{search_term:v})},800)};$("#sort").onchange=render;
 var curRoute="home";
 function render(){
   const q=$("#q").value.trim().toLowerCase(),s=$("#sort").value;
@@ -389,25 +409,25 @@ function tick(){let t=Math.max(0,end-new Date());const p=n=>String(n).padStart(2
 /* Cart */
 let cart=[];try{cart=JSON.parse(localStorage.getItem("pt-cart"))||[]}catch(e){}
 function save(){try{localStorage.setItem("pt-cart",JSON.stringify(cart))}catch(e){}}
-function add(id){const x=cart.find(c=>c.id===id);x?x.n++:cart.push({id,n:1});save();drawCart();toast(`Added “${byId(id).t}” to cart`);const b=$(".cartbtn");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}
+function add(id){const x=cart.find(c=>c.id===id);x?x.n++:cart.push({id,n:1});track("add_to_cart",{value:byId(id).p,items:[gi(byId(id))]});save();drawCart();toast(`Added “${byId(id).t}” to cart`);const b=$(".cartbtn");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}
 function drawCart(){
   const n=cart.reduce((a,c)=>a+c.n,0),tot=cart.reduce((a,c)=>a+c.n*byId(c.id).p,0);
   $("#cnt").textContent=n;$("#total").textContent=money(tot);
   $("#items").innerHTML=cart.length?cart.map(c=>{const b=byId(c.id);return `<div class="it"><div class="th">${cover(b)}</div><div><h4>${b.t}</h4><div class="by" style="font-size:.8rem;color:var(--muted)">${money(b.p)}</div><div class="q"><button data-a="dec" data-id="${b.id}" aria-label="Decrease">−</button><span>${c.n}</span><button data-a="inc" data-id="${b.id}" aria-label="Increase">+</button></div></div><div style="text-align:right"><b>${money(b.p*c.n)}</b><br><button class="rm" data-a="rm" data-id="${b.id}">Remove</button></div></div>`}).join(""):`<p class="empty" style="padding:60px 0">Your cart is empty. Add a book from the shelves to get started.</p>`;
 }
 $("#items").onclick=e=>{const a=e.target.dataset.a,id=+e.target.dataset.id;if(!a)return;const x=cart.find(c=>c.id===id);
-  if(a==="inc")x.n++;if(a==="dec"&&--x.n<1)cart=cart.filter(c=>c!==x);if(a==="rm")cart=cart.filter(c=>c!==x);save();drawCart()};
+  if(a==="inc")x.n++;if(a==="dec"&&--x.n<1)cart=cart.filter(c=>c!==x);if(a==="rm"){track("remove_from_cart",{items:[gi(byId(id),x.n)]});cart=cart.filter(c=>c!==x)}save();drawCart()};
 const open=v=>{$("#drawer").classList.toggle("on",v);$("#ov").classList.toggle("on",v)};
-$("#openCart").onclick=()=>open(true);$("#closeCart").onclick=$("#ov").onclick=()=>open(false);
+$("#openCart").onclick=()=>{open(true);track("view_cart",{value:cart.reduce((a,c)=>a+c.n*byId(c.id).p,0),items:cart.map(c=>gi(byId(c.id),c.n))})};$("#closeCart").onclick=$("#ov").onclick=()=>open(false);
 document.addEventListener("keydown",e=>e.key==="Escape"&&open(false));
 $("#checkout").onclick=()=>{if(!cart.length)return toast("Your cart is empty. Add a book first.");
   const o={id:"NB-"+Math.random().toString(36).slice(2,8).toUpperCase(),items:cart.map(c=>({...c})),total:cart.reduce((a,c)=>a+c.n*byId(c.id).p,0),at:Date.now()};
-  orders.unshift(o);saveO();cart=[];save();drawCart();open(false);go("/thank-you/"+o.id)};
+  orders.unshift(o);saveO();const gitems=o.items.map(c=>gi(byId(c.id),c.n));track("begin_checkout",{value:o.total,items:gitems});track("purchase",{transaction_id:o.id,value:o.total,shipping:0,items:gitems});cart=[];save();drawCart();open(false);go("/thank-you/"+o.id)};
 drawCart();
 
 /* UI helpers */
 let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2400)}
-$("#sub").onclick=()=>{const m=$("#mail");if(/^\S+@\S+\.\S+$/.test(m.value)){toast("Subscribed. Welcome to the reading list!");m.value=""}else toast("Enter a valid email address.")};
+$("#sub").onclick=()=>{const m=$("#mail");if(/^\S+@\S+\.\S+$/.test(m.value)){track("sign_up",{method:"newsletter"});toast("Subscribed. Welcome to the reading list!");m.value=""}else toast("Enter a valid email address.")};
 $("#burger").onclick=()=>$("#links").classList.toggle("open");
 $("#links").onclick=()=>$("#links").classList.remove("open");
 addEventListener("scroll",()=>$("#nav").classList.toggle("solid",scrollY>50),{passive:true});
@@ -438,7 +458,7 @@ function showTrack(id){
 function findOrder(id){
   id=id.trim().toUpperCase();const o=orders.find(x=>x.id===id);clearInterval(poll);last=-1;
   if(!o){$("#tres").innerHTML=`<div class="msg">We couldn't find order “${id||"…"}”. Check the ID on your confirmation page and try again. Orders are saved on the device where they were placed.</div>`;return}
-  const draw=()=>{const i=stageOf(o);if(i!==last){last=i;$("#tres").innerHTML=trackHTML(o)}};draw();poll=setInterval(draw,1000);
+  track("track_order",{transaction_id:o.id});const draw=()=>{const i=stageOf(o);if(i!==last){last=i;$("#tres").innerHTML=trackHTML(o)}};draw();poll=setInterval(draw,1000);
 }
 $("#tf").onsubmit=e=>{e.preventDefault();findOrder($("#tid").value)};
 $("#recent").onclick=e=>{const id=e.target.dataset.o;if(id){$("#tid").value=id;findOrder(id)}};
@@ -459,6 +479,11 @@ function curPath(){let p=CLEAN?location.pathname.replace(/index\.html$/,""):loca
 function go(p,rep){if(CLEAN){history[rep?"replaceState":"pushState"]({},"",p);route()}else if(rep)location.replace("#"+p);else location.hash=p}
 document.addEventListener("click",e=>{const a=e.target.closest("a[href]");if(!a||e.metaKey||e.ctrlKey||e.shiftKey||a.target)return;let h=a.getAttribute("href");if(h.startsWith("#/"))h=h.slice(1);if(!h.startsWith("/")||h.startsWith("//"))return;e.preventDefault();go(h)});
 addEventListener("popstate",route);
+const META={home:["Paperleaf Books – Independent Online Bookshop in India","Hand-picked fiction, mystery, sci-fi, self-growth, non-fiction and kids' books. Free delivery over ₹499, cash on delivery and 7-day returns."],shop:["Shop All Books – Fiction, Mystery, Sci-Fi & More | Paperleaf Books","Browse every title by genre, search by name and sort by price. Fast delivery across India."],featured:["Book of the Month | Paperleaf Books","Our staff pick for this month, with a limited-time countdown."],about:["About Paperleaf Books – Independent Bookshop","The story behind our curated shelves, fair prices and personal service."],reviews:["Reader Reviews | Paperleaf Books","See what our readers say about ordering from Paperleaf Books."],contact:["Contact Paperleaf Books – Chennai","Visit the shop, email us or send a message. We reply quickly."],track:["Track Your Order | Paperleaf Books","Enter your order ID to see live delivery status."],"thank-you":["Order Confirmed | Paperleaf Books","Thank you for your order."]};
+function seo(r){const t=META[r]||META.home,url=(CLEAN?location.origin:"")+curPath();
+  document.title=t[0];$('meta[name=description]').content=t[1];$("#ogt").content=t[0];$("#ogd").content=t[1];$("#ogu").content=url;$("#canon").href=url;
+  $("#robots").content=(r==="track"||r==="thank-you")?"noindex,follow":"index,follow";
+  track("page_view",{page_title:t[0],page_path:curPath(),page_location:location.href})}
 const PAGES={home:["",""],shop:["Shop all books","Browse every title, filter by genre or search by name."],featured:["Book of the month","Our pick for this month."],about:["About us","The story behind the shelves."],reviews:["Reader reviews","What our readers say about us."],contact:["Contact us","Questions, requests or recommendations? Write to us."],track:["Track your order","See exactly where your books are."],"thank-you":["Thank you for your order!","Your order is confirmed."]};
 function route(){
   clearInterval(poll);
@@ -470,7 +495,7 @@ function route(){
   $$(".links a").forEach(a=>a.classList.toggle("act",a.dataset.r===r));
   $("#sh").textContent=r==="home"?"Reader favourites":"All books";
   $("#sp").textContent=r==="home"?"Our most-loved titles right now.":"Filter by genre, search by title, sort by price.";
-  render();
+  render();seo(r);
   if(r==="thank-you"){const o=orders.find(x=>x.id===id);if(o)showThanks(o);else{go("/track",true);return}}
   if(r==="track")showTrack(id);
   scrollTo(0,0);
@@ -479,7 +504,7 @@ addEventListener("hashchange",route);route();
 $("#cf").onsubmit=e=>{e.preventDefault();const f=e.target.elements,n=f.nm.value.trim(),m=f.em.value.trim(),g=f.ms.value.trim();
   if(!n||!/^\S+@\S+\.\S+$/.test(m)||!g)return toast("Please enter your name, a valid email and a message.");
   let a=[];try{a=JSON.parse(localStorage.getItem("nb-msgs"))||[]}catch(x){}a.push({n,m,g,at:Date.now()});try{localStorage.setItem("nb-msgs",JSON.stringify(a))}catch(x){}
-  e.target.reset();toast("Thanks "+n+"! Your message is sent. We will reply soon.")};
+  track("generate_lead",{form:"contact"});e.target.reset();toast("Thanks "+n+"! Your message is sent. We will reply soon.")};
 
 /* Scroll reveal + counters */
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add("in");
